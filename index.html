@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ইনসাফ ট্রাভেলস — ম্যানেজমেন্ট (ডেমো)</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1a3a6b; --teal:#1a7aaa; --orange:#f47920;
+    --bg:#f4f6fa; --card:#ffffff; --line:#e6eaf1;
+    --text:#1d2433; --muted:#7a869a; --green:#1c9e6b; --red:#d9544d;
+    --shadow:0 1px 3px rgba(20,40,80,.08),0 6px 18px rgba(20,40,80,.05);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Hind Siliguri',system-ui,'Noto Sans Bengali','Segoe UI',sans-serif;
+    background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;padding-bottom:74px}
+  header{background:linear-gradient(135deg,var(--navy),var(--teal));color:#fff;padding:12px 14px;
+    position:sticky;top:0;z-index:50;box-shadow:0 2px 10px rgba(20,40,80,.15);display:flex;align-items:center;gap:12px}
+  .hamb{background:rgba(255,255,255,.16);border:none;width:40px;height:40px;border-radius:10px;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;cursor:pointer}
+  .hamb span{width:18px;height:2px;background:#fff;border-radius:2px}
+  header .logo{width:38px;height:38px;border-radius:9px;background:#fff;padding:3px;object-fit:contain}
+  header h1{font-size:16px;font-weight:700;line-height:1.1}
+  header .sub{font-size:11px;opacity:.85;font-weight:400}
+  .demo-tag{margin-left:auto;background:rgba(255,255,255,.18);font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500}
+
+  /* Drawer */
+  #drawerBg{position:fixed;inset:0;background:rgba(10,20,40,.45);z-index:80;opacity:0;pointer-events:none;transition:.25s}
+  #drawerBg.show{opacity:1;pointer-events:auto}
+  #drawer{position:fixed;top:0;right:0;bottom:0;width:264px;max-width:82%;background:#fff;z-index:81;
+    transform:translateX(100%);transition:.28s;box-shadow:-2px 0 20px rgba(20,40,80,.2);display:flex;flex-direction:column}
+  #drawer.show{transform:none}
+  .dr-head{background:linear-gradient(135deg,var(--navy),var(--teal));color:#fff;padding:18px 16px;display:flex;align-items:center;gap:10px}
+  .dr-head img{width:46px;height:46px;border-radius:10px;background:#fff;padding:4px;object-fit:contain}
+  .dr-head .nm{font-size:15px;font-weight:700}.dr-head .ad{font-size:10.5px;opacity:.85}
+  .dr-list{flex:1;overflow:auto;padding:8px}
+  .dr-list button{width:100%;text-align:left;background:none;border:none;padding:13px 14px;border-radius:10px;
+    font-family:inherit;font-size:15px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:11px}
+  .dr-list button:active,.dr-list button.active{background:#eef2f8;color:var(--navy);font-weight:600}
+  .dr-list .ic{font-size:18px;width:22px;text-align:center}
+  .dr-sep{height:1px;background:var(--line);margin:8px 6px}
+  .dr-list .logout{color:var(--red)}
+
+  main{padding:14px 14px 0}
+  .page{display:none;animation:fade .25s ease}
+  .page.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  h2.title{font-size:18px;font-weight:700;color:var(--navy);margin-bottom:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:14px;margin-bottom:12px}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+  .stat{border-radius:14px;padding:14px;color:#fff}
+  .stat .lbl{font-size:12px;opacity:.9;font-weight:500}
+  .stat .val{font-size:20px;font-weight:700;margin-top:4px}
+  .stat.sales{background:linear-gradient(135deg,var(--navy),#2b5398)}
+  .stat.collect{background:linear-gradient(135deg,var(--teal),#2a98c9)}
+  .stat.due{background:linear-gradient(135deg,var(--orange),#ff9d4d)}
+  .stat.cost{background:linear-gradient(135deg,#6a5acd,#8674e0)}
+  .stat.expense{background:linear-gradient(135deg,#5a6b85,#7a869a)}
+  .net-card{display:flex;justify-content:space-between;align-items:center;background:#eef7f2;border:1px solid #cdeadd;border-radius:14px;padding:13px 15px;margin-bottom:12px}
+  .net-card .l{font-size:13px;color:var(--muted);font-weight:500}
+  .net-card .n{font-size:19px;font-weight:700;color:var(--green)}
+  .pills{display:flex;gap:8px;margin-bottom:12px}
+  .pill{flex:1;text-align:center;padding:8px;border-radius:10px;background:#fff;border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+  .pill.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--navy);margin:10px 0 5px}
+  input,select,textarea{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:15px;font-family:inherit;background:#fff;color:var(--text)}
+  textarea{min-height:74px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .btn{width:100%;padding:13px;border:none;border-radius:11px;background:var(--orange);color:#fff;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:14px}
+  .btn:active{opacity:.85}
+  .btn.sec{background:var(--navy)}
+  .btn.ghost{background:#fff;color:var(--navy);border:1.5px solid var(--line);margin-top:8px}
+  .btn.sm{padding:9px;font-size:13px;margin-top:8px}
+  .search{margin-bottom:10px}
+  .item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-bottom:9px;box-shadow:var(--shadow)}
+  .item .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .item .nm{font-weight:600;font-size:15px}
+  .item .meta{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .item .amt{font-weight:700;font-size:15px;white-space:nowrap}
+  .badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:6px;margin-right:4px}
+  .badge.umrah{background:#e8f0fb;color:var(--navy)}
+  .badge.ticket{background:#fff0e3;color:#c05a10}
+  .badge.paid{background:#e6f6ee;color:var(--green)}
+  .badge.due{background:#fdeceb;color:var(--red)}
+  .badge.adv{background:#ede9fb;color:#5a3ec8}
+  .pill-method{background:#eef2f8;color:var(--teal)}
+  .acts{display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:96px}
+  .act{border:none;font-size:13px;font-weight:700;cursor:pointer;padding:8px 12px;border-radius:9px;font-family:inherit;white-space:nowrap;text-align:center}
+  .act:active{opacity:.8}
+  .act.del{background:#fdeceb;color:var(--red)}.act.ed{background:#e4f1f7;color:var(--teal)}.act.pr{background:#eef2f8;color:var(--navy)}
+  .empty{text-align:center;color:var(--muted);padding:30px 10px;font-size:14px}
+  .empty .ic{font-size:34px;display:block;margin-bottom:6px;opacity:.5}
+  .sec-head{font-size:13px;font-weight:700;color:var(--muted);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.4px}
+  .hint{font-size:12px;color:var(--muted);margin-top:4px}
+  .editing{background:#fff8ef;border:1.5px solid var(--orange)}
+  .edbar{display:none;background:#fff3e3;border:1px solid #ffd9b0;border-radius:9px;padding:8px 11px;margin-bottom:8px;font-size:12.5px;color:#c05a10;font-weight:600;align-items:center;justify-content:space-between}
+  .edbar.show{display:flex}
+  .edbar button{background:none;border:none;color:var(--navy);font-weight:700;cursor:pointer;font-family:inherit}
+
+  /* searchable dropdown */
+  .srch-wrap{position:relative}
+  .srch-list{position:absolute;left:0;right:0;top:100%;z-index:20;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);max-height:220px;overflow:auto;margin-top:3px;display:none}
+  .srch-list.show{display:block}
+  .srch-list div{padding:10px 12px;cursor:pointer;font-size:14px;border-bottom:1px solid #f1f4f9}
+  .srch-list div:active,.srch-list div:hover{background:#eef2f8}
+  .srch-list .none{color:var(--muted);text-align:center}
+  .info-box{display:none;background:#eef2f8;border:1px solid #d6e0ee;border-radius:10px;padding:10px 12px;margin-top:8px;font-size:13px}
+
+  nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;z-index:60;box-shadow:0 -2px 12px rgba(20,40,80,.06);padding-bottom:env(safe-area-inset-bottom)}
+  nav button{flex:1;background:none;border:none;padding:8px 2px 9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-family:inherit}
+  nav button .ic{font-size:19px;line-height:1}
+  nav button .t{font-size:10.5px;font-weight:600;white-space:nowrap}
+  nav button.active{color:var(--navy)}
+  #toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:11px 18px;border-radius:30px;font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:.3s;z-index:100;box-shadow:var(--shadow);white-space:nowrap}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* Print overlay */
+  #printArea{display:none;position:fixed;inset:0;background:#fff;z-index:9999;overflow:auto;-webkit-overflow-scrolling:touch}
+  #printArea.show{display:block}
+  .po-bar{position:sticky;top:0;display:flex;gap:8px;padding:10px;background:var(--navy);z-index:2}
+  .po-bar button{flex:1;padding:11px;border:none;border-radius:9px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer}
+  .po-bar .pr{background:var(--orange);color:#fff}.po-bar .cl{background:#fff;color:var(--navy)}
+  .po-page{margin:14px auto;background:#fff;color:#1d2433;padding:26px;max-width:760px;box-shadow:0 0 0 1px var(--line);font-size:13px}
+  .po-page.half{max-width:600px}
+  .rc-head{display:flex;flex-direction:column;align-items:center;text-align:center;border-bottom:3px solid var(--navy);padding-bottom:12px;margin-bottom:8px}
+  .rc-head img{width:64px;height:64px;object-fit:contain;margin-bottom:6px}
+  .rc-head .biz{width:100%}
+  .rc-head .biz h1{color:var(--navy);font-size:21px;line-height:1.15}
+  .rc-head .biz .tag{font-size:11px;color:var(--orange);font-weight:700;letter-spacing:.3px}
+  .rc-head .biz .info{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5}
+  .rc-title{background:var(--navy);color:#fff;text-align:center;padding:8px;border-radius:7px;font-weight:700;font-size:15px;margin:14px 0 12px;letter-spacing:.5px}
+  .rc-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:10px}
+  .rc-bigname{font-size:22px;font-weight:700;color:var(--navy);margin:2px 0 10px}
+  .rc-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);font-size:13px;gap:10px}
+  .rc-row .k{color:var(--muted)}.rc-row .v{font-weight:600;text-align:right}
+  .rc-amount{background:#eef7f2;border:1px solid #cdeadd;border-radius:9px;padding:13px;text-align:center;margin:13px 0}
+  .rc-amount .l{font-size:12px;color:var(--muted)}.rc-amount .n{font-size:27px;font-weight:800;color:var(--green)}
+  .rc-desc{background:#f7f9fc;border:1px solid var(--line);border-radius:8px;padding:11px 13px;font-size:12.5px;white-space:pre-line;margin:8px 0}
+  .po-page h3{font-size:14px;color:var(--navy);margin:15px 0 7px}
+  .po-page table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px}
+  .po-page table.wt td,.po-page table.wt th{white-space:nowrap}
+  @media(max-width:520px){.po-page{padding:16px 12px}.po-page table{font-size:11px}}
+  .po-page th,.po-page td{border:1px solid var(--line);padding:7px 9px;text-align:left}
+  .po-page th{background:#f4f6fa;color:var(--navy)}
+  .po-page td.r,.po-page th.r{text-align:right}
+  .po-sum{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0}
+  .po-sum div{border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+  .po-sum .l{font-size:11px;color:var(--muted)}.po-sum .v{font-size:16px;font-weight:700;color:var(--navy)}
+  .po-page .green{color:var(--green)!important}.po-page .orange{color:var(--orange)!important}.po-page .red{color:var(--red)!important}
+  .rc-foot{margin-top:20px;border-top:1px solid var(--line);padding-top:12px;display:flex;justify-content:space-between;align-items:flex-end;font-size:11px;color:var(--muted)}
+  .rc-sign{text-align:center}.rc-sign .ln{width:140px;border-top:1px solid #98a2b3;margin-bottom:3px}
+  @media print{
+    body{padding:0!important}
+    body>*{display:none!important}
+    #printArea{display:block!important;position:static;overflow:visible}
+    .po-bar{display:none!important}
+    .po-page{box-shadow:none;margin:0;max-width:100%;padding:0}
+    @page{margin:14mm}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img class="logo" id="hdrLogo" alt="logo">
+  <div>
+    <h1 id="hdrName">ইনসাফ ট্রাভেলস</h1>
+    <div class="sub">অফিস ম্যানেজমেন্ট</div>
+  </div>
+  <button class="hamb" onclick="openDrawer()" style="margin-left:auto"><span></span><span></span><span></span></button>
+</header>
+
+<!-- Drawer -->
+<div id="drawerBg" onclick="closeDrawer()"></div>
+<div id="drawer">
+  <div class="dr-head"><img id="drLogo" alt=""><div><div class="nm" id="drName">ইনসাফ ট্রাভেলস</div><div class="ad" id="drAd"></div></div></div>
+  <div class="dr-list" id="drList"></div>
+</div>
+
+<main>
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="page active">
+    <h2 class="title">ড্যাশবোর্ড</h2>
+    <div class="pills" id="periodPills">
+      <div class="pill" data-period="month">এই মাস</div>
+      <div class="pill active" data-period="year">এই বছর</div>
+      <div class="pill" data-period="all">সর্বমোট</div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat sales"><div class="lbl">মোট বিক্রয়</div><div class="val" id="dSales">৳0</div></div>
+      <div class="stat collect"><div class="lbl">মোট আদায়</div><div class="val" id="dCollect">৳0</div></div>
+      <div class="stat due"><div class="lbl">মোট বাকি</div><div class="val" id="dDue">৳0</div></div>
+      <div class="stat cost"><div class="lbl">মোট ক্রয়</div><div class="val" id="dCost">৳0</div></div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat expense"><div class="lbl">অফিস খরচ</div><div class="val" id="dExpense">৳0</div></div>
+      <div class="stat" style="background:linear-gradient(135deg,#1c9e6b,#2bbd86)"><div class="lbl">মোট প্রফিট</div><div class="val" id="dProfit">৳0</div></div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat" style="grid-column:1 / -1;text-align:center;background:linear-gradient(135deg,#0e7c5a,#12a074)"><div class="lbl">নিট প্রফিট</div><div class="val" id="dNet">৳0</div></div>
+    </div>
+    <div class="sec-head">সর্বশেষ বিক্রয়</div>
+    <div id="recentSales"></div>
+    <div class="sec-head">প্রিন্ট / PDF</div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="hint" style="margin-top:0">নির্বাচিত পিরিয়ড অনুযায়ী রিপোর্ট।</div>
+      <button class="btn" onclick="printReport()">📄 ড্যাশবোর্ড রিপোর্ট</button>
+      <button class="btn sec" onclick="printBookings()">📋 সব বুকিং লিস্ট</button>
+      <button class="btn sec" onclick="printExpenses()">🧾 খরচ হিসাব</button>
+    </div>
+  </section>
+
+  <!-- CUSTOMER -->
+  <section id="customer" class="page">
+    <h2 class="title">কাস্টমার</h2>
+    <div class="card">
+      <div class="edbar" id="cEdbar"><span>কাস্টমার এডিট করছেন</span><button onclick="cancelEditCustomer()">✕ বাতিল</button></div>
+      <label>নাম *</label>
+      <input id="cName" placeholder="কাস্টমারের নাম">
+      <div class="row2">
+        <div><label>মোবাইল *</label><input id="cMobile" type="tel" placeholder="01XXXXXXXXX"></div>
+        <div><label>পাসপোর্ট নম্বর</label><input id="cPassport" placeholder="A01234567"></div>
+      </div>
+      <label>ঠিকানা *</label>
+      <input id="cAddress" placeholder="গ্রাম/থানা/জেলা">
+      <div class="row2">
+        <div><label>পাসপোর্ট ইস্যু</label><input id="cIssue" type="date"></div>
+        <div><label>পাসপোর্ট এক্সপায়ার</label><input id="cExpire" type="date"></div>
+      </div>
+      <button class="btn" id="cSubmit" onclick="addCustomer()">+ কাস্টমার যোগ করুন</button>
+    </div>
+    <div class="sec-head">কাস্টমার লিস্ট (<span id="cCount">0</span>)</div>
+    <input class="search" id="cSearch" placeholder="🔍 নাম / মোবাইল খুঁজুন" oninput="renderCustomers()">
+    <div id="customerList"></div>
+  </section>
+
+  <!-- BOOKING -->
+  <section id="booking" class="page">
+    <h2 class="title">বুকিং</h2>
+    <div class="card">
+      <div class="edbar" id="bEdbar"><span id="bEdtxt">এডিট করছেন</span><button onclick="cancelEditBooking()">✕ বাতিল</button></div>
+      <label>কাস্টমার *</label>
+      <div class="srch-wrap">
+        <input id="bCustSearch" placeholder="🔍 কাস্টমার নাম লিখে বাছুন" oninput="filterBCust()" onfocus="filterBCust()" autocomplete="off">
+        <div class="srch-list" id="bCustList"></div>
+      </div>
+      <input type="hidden" id="bCustomer">
+      <label>ধরন *</label>
+      <select id="bType" onchange="toggleBookingFields()">
+        <option value="উমরাহ">উমরাহ</option>
+        <option value="হজ্ব">হজ্ব</option>
+        <option value="টিকেট">টিকেট</option>
+        <option value="অন্যান্য">অন্যান্য (নিজে লিখুন)</option>
+      </select>
+      <input id="bTypeOther" placeholder="ধরন লিখুন" style="display:none;margin-top:8px">
+      <!-- package dropdown (umrah/hajj/tour...) -->
+      <div id="bPkgWrap" style="display:none">
+        <label>প্যাকেজ (রেডি থাকলে বাছুন)</label>
+        <select id="bPkg"></select>
+      </div>
+      <!-- flight fields (ticket) -->
+      <div id="bFlightWrap" style="display:none">
+        <label>ফ্লাইট তথ্য</label>
+        <input id="bAirline" placeholder="বিমান (এয়ারলাইন)">
+        <div class="row2" style="margin-top:8px">
+          <input id="bRoute" placeholder="রুট (যেমন DAC-JED)">
+          <input id="bTime" placeholder="সময়/তারিখ">
+        </div>
+      </div>
+      <div class="row2">
+        <div><label>বিক্রয় মূল্য (৳) *</label><input id="bTotal" type="number" placeholder="0" oninput="calcProfit()"></div>
+        <div><label>কস্ট / ক্রয় (৳) *</label><input id="bCost" type="number" placeholder="0" oninput="calcProfit()"></div>
+      </div>
+      <label>ডিসকাউন্ট / ছাড় (৳) <span style="color:var(--muted);font-weight:400">(ঐচ্ছিক)</span></label>
+      <input id="bDiscount" type="number" placeholder="0">
+      <label>বুকিং তারিখ *</label>
+      <input id="bDate" type="date">
+      <button class="btn" id="bSubmit" onclick="saveBooking()">+ বুকিং যোগ করুন</button>
+    </div>
+    <div class="sec-head">সব বুকিং (<span id="bCount">0</span>)</div>
+    <input class="search" id="bSearch" placeholder="🔍 বুকিং নম্বর খুঁজুন (১০২১)" inputmode="numeric" oninput="renderBookings()">
+    <div id="bookingList"></div>
+  </section>
+
+  <!-- PAYMENT -->
+  <section id="payment" class="page">
+    <h2 class="title">পেমেন্ট</h2>
+    <div class="card">
+      <div class="edbar" id="pEdbar"><span>পেমেন্ট এডিট করছেন</span><button onclick="cancelEditPayment()">✕ বাতিল</button></div>
+      <label>কাস্টমার *</label>
+      <div class="srch-wrap">
+        <input id="pCustSearch" placeholder="🔍 কাস্টমার নাম লিখে বাছুন" oninput="filterPCust()" onfocus="filterPCust()" autocomplete="off">
+        <div class="srch-list" id="pCustList"></div>
+      </div>
+      <input type="hidden" id="pCustomer">
+      <label>কোন বুকিং? <span style="color:var(--muted);font-weight:400">(না বাছলে নামে ক্রেডিট)</span></label>
+      <select id="pBooking" onchange="showBookingInfo()"></select>
+      <div class="info-box" id="pInfo"></div>
+      <div class="row2">
+        <div><label>জমা টাকা (৳) *</label><input id="pAmount" type="number" placeholder="0"></div>
+        <div><label>পেমেন্ট মেথড</label>
+          <select id="pMethod"><option>ক্যাশ</option><option>বিকাশ</option><option>নগদ</option><option>ব্যাংক</option><option>অন্যান্য</option></select>
+        </div>
+      </div>
+      <label>তারিখ *</label>
+      <input id="pDate" type="date">
+      <button class="btn" id="pSubmit" onclick="savePayment()">+ পেমেন্ট যোগ করুন</button>
+    </div>
+    <div class="sec-head">পেমেন্ট হিস্ট্রি (<span id="pCount">0</span>)</div>
+    <input class="search" id="pSearch" placeholder="🔍 পেমেন্ট নম্বর খুঁজুন (১০১)" inputmode="numeric" oninput="renderPayments()">
+    <div id="paymentList"></div>
+  </section>
+
+  <!-- EXPENSE -->
+  <section id="expense" class="page">
+    <h2 class="title">অফিস খরচ</h2>
+    <div class="card">
+      <div class="edbar" id="eEdbar"><span>খরচ এডিট করছেন</span><button onclick="cancelEditExpense()">✕ বাতিল</button></div>
+      <label>খরচের ধরন *</label>
+      <select id="eCat"><option>অফিস ভাড়া</option><option>বেতন</option><option>ইন্টারনেট</option><option>বিদ্যুৎ বিল</option><option>অন্যান্য</option></select>
+      <div class="row2">
+        <div><label>পরিমাণ (৳) *</label><input id="eAmount" type="number" placeholder="0"></div>
+        <div><label>তারিখ *</label><input id="eDate" type="date"></div>
+      </div>
+      <label>নোট</label>
+      <input id="eNote" placeholder="বিস্তারিত (ঐচ্ছিক)">
+      <button class="btn" id="eSubmit" onclick="addExpense()">+ খরচ যোগ করুন</button>
+    </div>
+    <div class="sec-head">খরচের তালিকা (<span id="eCount">0</span>)</div>
+    <input class="search" id="eSearch" placeholder="🔍 খরচ নম্বর খুঁজুন (১০১)" inputmode="numeric" oninput="renderExpenses()">
+    <div id="expenseList"></div>
+  </section>
+
+  <!-- PACKAGES -->
+  <section id="packages" class="page">
+    <h2 class="title">প্যাকেজ তৈরি</h2>
+    <div class="card">
+      <div class="edbar" id="kEdbar"><span>প্যাকেজ এডিট করছেন</span><button onclick="cancelEditPackage()">✕ বাতিল</button></div>
+      <div class="hint" style="margin-top:0">যেকোনো ধরনের প্যাকেজ তৈরি করুন — বুকিংয়ে ওই ধরন বাছলে এগুলো দেখাবে।</div>
+      <label>ধরন *</label>
+      <select id="kCat"><option>উমরাহ</option><option>হজ্ব</option><option>ট্যুর</option><option>অন্যান্য</option></select>
+      <label>প্যাকেজের নাম *</label>
+      <input id="kName" placeholder="যেমন: ইকোনমি উমরাহ ১৪ দিন">
+      <label>বিমান (এয়ারলাইন)</label>
+      <input id="kAirline" placeholder="যেমন: Saudia / Biman">
+      <label>তারিখ</label>
+      <input id="kDate" placeholder="যেমন: ১৫ রমজান / ১০-২৪ মার্চ">
+      <div class="row2">
+        <div><label>মক্কা হোটেল</label><input id="kMakkah" placeholder="হোটেলের নাম/দূরত্ব"></div>
+        <div><label>মদিনা হোটেল</label><input id="kMadinah" placeholder="হোটেলের নাম/দূরত্ব"></div>
+      </div>
+      <div class="row2">
+        <div><label>প্রতি রুমে কতজন</label><input id="kRoom" placeholder="যেমন: ৪ জন"></div>
+        <div><label>খাবার</label><input id="kFood" placeholder="যেমন: ৩ বেলা"></div>
+      </div>
+      <label>শর্তাবলী</label>
+      <textarea id="kTerms" placeholder="শর্তাবলী (ঐচ্ছিক)"></textarea>
+      <label>প্যাকেজ মূল্য (৳) <span style="color:var(--muted);font-weight:400">(ঐচ্ছিক — বাছলে বিক্রয় মূল্যে বসবে)</span></label>
+      <input id="kPrice" type="number" placeholder="0">
+      <button class="btn" id="kSubmit" onclick="addPackage()">+ প্যাকেজ যোগ করুন</button>
+    </div>
+    <div class="sec-head">তৈরি প্যাকেজ (<span id="kCount">0</span>)</div>
+    <div id="packageList"></div>
+  </section>
+</main>
+
+<nav id="nav">
+  <button class="active" data-tab="dashboard"><span class="ic">📊</span><span class="t">ড্যাশবোর্ড</span></button>
+  <button data-tab="customer"><span class="ic">👤</span><span class="t">কাস্টমার</span></button>
+  <button data-tab="booking"><span class="ic">📋</span><span class="t">বুকিং</span></button>
+  <button data-tab="payment"><span class="ic">💵</span><span class="t">পেমেন্ট</span></button>
+  <button data-tab="expense"><span class="ic">🧾</span><span class="t">খরচ</span></button>
+</nav>
+
+<div id="toast"></div>
+<div id="printArea"></div>
+
+<script>
+/* ========= ব্যবসার তথ্য (ফিক্সড — এখানে এডিট করুন) ========= */
+const BIZ={
+  name:'ইনসাফ ট্রাভেলস',
+  address:'৪৪৩ রংমহল টাওয়ার, ৪র্থ তলা, বন্দর বাজার, সিলেট',
+  mobile:'০১৭১৫২৭৪২৫৭, ০১৬২১৪৭১৭৮০',
+  email:'info@insaftravelsbd.com',
+  web:'www.insaftravelsbd.com',
+  logo:'data:image/png;base64,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'
+};
+
+/* =========================================================
+   DATA LAYER (ডেমো — মেমোরিতে)। মেইন ফাইলে এই অংশ Firebase হবে।
+   ========================================================= */
+let DB={customers:[],bookings:[],payments:[],expenses:[],packages:[],seq:1024,pseq:100,eseq:100};
+let uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+function seedDemo(){
+  const Y=new Date().getFullYear();
+  DB={customers:[],bookings:[],payments:[],expenses:[],packages:[],seq:1024,pseq:100,eseq:100};
+  const c1=uid(),c2=uid(),c3=uid(),c4=uid();
+  DB.customers=[
+    {id:c1,name:'মোহাম্মদ রফিকুল ইসলাম',mobile:'01711000001',passport:'A01234567',address:'জিন্দাবাজার, সিলেট',issue:`${Y-3}-01-15`,expire:`${Y+2}-01-14`},
+    {id:c2,name:'আবুল কালাম আজাদ',mobile:'01811000002',passport:'B07654321',address:'বন্দরবাজার, সিলেট',issue:`${Y-4}-05-10`,expire:`${Y}-09-10`},
+    {id:c3,name:'ফাতেমা বেগম',mobile:'01911000003',passport:'C05556677',address:'আম্বরখানা, সিলেট',issue:`${Y-2}-03-01`,expire:`${Y+3}-02-28`},
+    {id:c4,name:'সাইফুল হক',mobile:'01611000004',passport:'',address:'উপশহর, সিলেট',issue:'',expire:''},
+  ];
+  const k1=uid(),k2=uid();
+  DB.packages=[
+    {id:k1,cat:'উমরাহ',name:'ইকোনমি উমরাহ ১৪ দিন',price:165000,airline:'Saudia',date:'রমজান',makkah:'হারাম থেকে ৮০০ মি',madinah:'মসজিদে নববী ৫০০ মি',room:'৪ জন',food:'৩ বেলা',terms:'ভিসা ও টিকেট অন্তর্ভুক্ত। মাহরাম আবশ্যক।'},
+    {id:k2,cat:'উমরাহ',name:'প্রিমিয়াম উমরাহ ১০ দিন',price:235000,airline:'Biman',date:'যেকোনো সময়',makkah:'৫ তারকা',madinah:'৫ তারকা',room:'২ জন',food:'৩ বেলা বুফে',terms:'সম্পূর্ণ প্যাকেজ।'},
+  ];
+  const b1=uid(),b2=uid(),b3=uid(),b4=uid();
+  DB.bookings=[
+    {id:b1,no:'B-1021',customerId:c1,type:'উমরাহ',pkg:'ইকোনমি উমরাহ ১৪ দিন',desc:DB.packages[0].details,total:185000,cost:160000,date:`${Y}-06-02`},
+    {id:b2,no:'B-1022',customerId:c2,type:'উমরাহ',pkg:'',desc:'',total:172000,cost:150000,date:`${Y}-06-10`},
+    {id:b3,no:'B-1023',customerId:c3,type:'টিকেট',airline:'Biman Bangladesh',route:'DAC-JED',time:'১৪ জুন, 02:30',total:62000,cost:55000,date:`${Y}-06-14`},
+    {id:b4,no:'B-1024',customerId:c4,type:'টিকেট',airline:'Saudia',route:'DAC-MED',time:'২৮ মে',total:48000,cost:43000,date:`${Y}-05-28`},
+  ];
+  DB.payments=[
+    {id:uid(),no:'P-101',customerId:c1,bookingId:b1,amount:100000,date:`${Y}-06-02`,method:'বিকাশ'},
+    {id:uid(),no:'P-102',customerId:c1,bookingId:b1,amount:50000,date:`${Y}-06-09`,method:'ক্যাশ'},
+    {id:uid(),no:'P-103',customerId:c2,bookingId:b2,amount:172000,date:`${Y}-06-10`,method:'ব্যাংক'},
+    {id:uid(),no:'P-104',customerId:c3,bookingId:b3,amount:30000,date:`${Y}-06-14`,method:'নগদ'},
+    {id:uid(),no:'P-105',customerId:c4,bookingId:b4,amount:48000,date:`${Y}-05-28`,method:'ক্যাশ'},
+  ];
+  DB.pseq=105;
+  DB.expenses=[
+    {id:uid(),no:'E-101',category:'অফিস ভাড়া',amount:25000,date:`${Y}-06-01`,note:'জুন মাস'},
+    {id:uid(),no:'E-102',category:'বেতন',amount:40000,date:`${Y}-06-01`,note:'২ জন স্টাফ'},
+    {id:uid(),no:'E-103',category:'ইন্টারনেট',amount:1500,date:`${Y}-06-03`,note:''},
+    {id:uid(),no:'E-104',category:'বিদ্যুৎ বিল',amount:3200,date:`${Y}-06-05`,note:''},
+  ];
+  DB.eseq=104;
+}
+
+/* ---- helpers ---- */
+const $=id=>document.getElementById(id);
+const enBn='০১২৩৪৫৬৭৮৯';
+const toBn=s=>String(s).replace(/[0-9]/g,d=>enBn[d]);
+const toEn=s=>String(s).replace(/[০-৯]/g,d=>enBn.indexOf(d));
+const fmt=n=>'৳'+toBn(Number(n||0).toLocaleString('en-IN'));
+const fmtNo=n=>toBn(Number(n||0).toLocaleString('en-IN')); // ৳ ছাড়া (কার্ডে)
+const noBn=no=>String(no||'').replace(/[0-9]/g,d=>enBn[d]); // B-1021 -> B-১০২১
+const cust=id=>DB.customers.find(c=>c.id===id)||{name:'—',mobile:''};
+const book=id=>DB.bookings.find(b=>b.id===id)||{};
+const paidFor=bid=>DB.payments.filter(p=>p.bookingId===bid).reduce((s,p)=>s+ +p.amount,0);
+const bnet=b=>(+b.total-(+b.discount||0)); // বিক্রয় − ডিসকাউন্ট = প্রদেয়
+const custTotal=cid=>DB.bookings.filter(b=>b.customerId===cid).reduce((s,b)=>s+bnet(b),0);
+const custPaid=cid=>DB.payments.filter(p=>p.customerId===cid).reduce((s,p)=>s+ +p.amount,0);
+const today=()=>new Date().toISOString().slice(0,10);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1800);}
+function dateBn(d){if(!d)return'';const[y,m,da]=d.split('-');return toBn(`${da}/${m}/${y}`);}
+function expiryWarn(exp){
+  if(!exp)return'';
+  const days=Math.round((new Date(exp)-new Date())/86400000);
+  if(days<0)return `<span class="badge due" style="margin-top:6px">⚠️ পাসপোর্ট মেয়াদোত্তীর্ণ</span>`;
+  if(days<=180)return `<span class="badge due" style="margin-top:6px">⚠️ মেয়াদ ৬ মাসের কম (${toBn(days)} দিন)</span>`;
+  return'';
+}
+// শক্ত ডিলিট কনফার্ম — DELETE টাইপ করতে হবে
+function hardDelete(label,cb){
+  const a=prompt(`"${label}" মুছে ফেলতে নিশ্চিত হলে নিচে DELETE লিখুন:`);
+  if(a===null)return;
+  if(a.trim().toUpperCase()==='DELETE'){cb();toast('🗑️ মুছে ফেলা হয়েছে');}
+  else toast('❌ বাতিল — DELETE লেখেননি');
+}
+
+let period='year';
+function inPeriod(d){
+  if(period==='all')return true;
+  const dt=new Date(d),n=new Date();
+  if(period==='year')return dt.getFullYear()===n.getFullYear();
+  return dt.getFullYear()===n.getFullYear()&&dt.getMonth()===n.getMonth();
+}
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+function renderDashboard(){
+  const bks=DB.bookings.filter(b=>inPeriod(b.date));
+  const pays=DB.payments.filter(p=>inPeriod(p.date));
+  const exps=DB.expenses.filter(e=>inPeriod(e.date));
+  const sales=bks.reduce((s,b)=>s+bnet(b),0);
+  const collect=pays.reduce((s,p)=>s+ +p.amount,0);
+  const expense=exps.reduce((s,e)=>s+ +e.amount,0);
+  const cost=bks.reduce((s,b)=>s+(+b.cost||0),0);
+  const profit=bks.reduce((s,b)=>s+(bnet(b)-(+b.cost||0)),0);
+  const dueCusts=[...new Set(bks.map(b=>b.customerId))];
+  const due=dueCusts.reduce((s,cid)=>s+(custTotal(cid)-custPaid(cid)),0);
+  $('dSales').textContent=fmtNo(sales);
+  $('dCollect').textContent=fmtNo(collect);
+  $('dDue').textContent=fmtNo(due);
+  $('dCost').textContent=fmtNo(cost);
+  $('dExpense').textContent=fmtNo(expense);
+  $('dProfit').textContent=fmtNo(profit);
+  $('dNet').textContent=fmtNo(profit-expense);
+  const recent=[...DB.bookings].slice(-5).reverse();
+  $('recentSales').innerHTML=recent.length?recent.map(b=>{
+    const c=cust(b.customerId),pd=paidFor(b.id),du=bnet(b)-pd;
+    return `<div class="item"><div class="top">
+      <div><div class="nm">${c.name} <span style="color:var(--teal);font-size:12px">#${noBn(b.no)}</span></div>
+      <div class="meta">${dateBn(b.date)} · আদায় ${fmt(pd)}</div>
+      <span class="badge ${b.type==='উমরাহ'?'umrah':'ticket'}">${b.type}</span>
+      <span class="badge ${du<=0?'paid':'due'}">${du<0?'অগ্রিম '+fmt(-du):du===0?'পরিশোধিত':'বাকি '+fmt(du)}</span></div>
+      <div class="amt">${fmt(bnet(b))}</div></div></div>`;
+  }).join(''):`<div class="empty"><span class="ic">📋</span>কোনো বুকিং নেই</div>`;
+}
+
+function renderCustomers(){
+  $('cCount').textContent=DB.customers.length;
+  const q=($('cSearch').value||'').toLowerCase();
+  const list=DB.customers.filter(c=>c.name.toLowerCase().includes(q)||(c.mobile||'').includes(q));
+  $('customerList').innerHTML=list.length?list.map(c=>{
+    const n=DB.bookings.filter(b=>b.customerId===c.id).length;
+    return `<div class="item"><div class="top">
+      <div><div class="nm">${c.name}</div>
+      <div class="meta">📱 ${c.mobile||'—'}${c.passport?' · 🛂 '+c.passport:''}</div>
+      <div class="meta">📍 ${c.address||'—'}</div>
+      <div class="meta">${n} টি বুকিং${c.expire?' · মেয়াদ '+dateBn(c.expire):''}</div>
+      ${expiryWarn(c.expire)}</div>
+      <div class="acts">
+      <button class="act pr" onclick="printCustomer('${c.id}')">বিস্তারিত</button>
+      <button class="act ed" onclick="editCustomer('${c.id}')">এডিট</button>
+      <button class="act del" onclick="delCustomer('${c.id}')">মুছুন</button></div>
+      </div></div>`;
+  }).join(''):`<div class="empty"><span class="ic">👤</span>কোনো কাস্টমার নেই</div>`;
+}
+
+function renderBookings(){
+  $('bCount').textContent=DB.bookings.length;
+  const q=toEn(($('bSearch').value||'')).replace(/[^0-9]/g,'');
+  const list=[...DB.bookings].sort((a,b)=>b.date.localeCompare(a.date)).filter(b=>(b.no||'').includes(q));
+  $('bookingList').innerHTML=list.length?list.map(b=>{
+    const c=cust(b.customerId),pd=paidFor(b.id),du=bnet(b)-pd,prof=bnet(b)-(+b.cost||0);
+    const tcls=b.type==='উমরাহ'||b.type==='হজ্ব'?'umrah':'ticket';
+    const extra=b.pkg?(' · '+b.pkg):b.airline?(' · '+b.airline+(b.route?' '+b.route:'')):'';
+    return `<div class="item"><div class="top">
+      <div><div class="nm">${c.name} <span style="color:var(--teal);font-size:12px">#${noBn(b.no)}</span></div>
+      <div class="meta">${dateBn(b.date)} · বিক্রয় ${fmt(b.total)}${b.discount?' − ছাড় '+fmt(b.discount):''} · কস্ট ${fmt(b.cost||0)}</div>
+      <div class="meta">আদায় ${fmt(pd)} · প্রফিট <b style="color:var(--green)">${fmt(prof)}</b>${extra}</div>
+      <span class="badge ${tcls}">${b.type}</span>
+      <span class="badge ${du<=0?(du<0?'adv':'paid'):'due'}">${du<0?'অগ্রিম '+fmt(-du):du===0?'পরিশোধিত':'বাকি '+fmt(du)}</span></div>
+      <div class="acts">
+      <button class="act pr" onclick="printBooking('${b.id}')">বিস্তারিত</button>
+      <button class="act ed" onclick="editBooking('${b.id}')">এডিট</button>
+      <button class="act del" onclick="delBooking('${b.id}')">মুছুন</button></div>
+      </div></div>`;
+  }).join(''):`<div class="empty"><span class="ic">📋</span>কোনো বুকিং নেই</div>`;
+}
+
+function renderPayments(){
+  $('pCount').textContent=DB.payments.length;
+  const q=toEn(($('pSearch').value||'')).replace(/[^0-9]/g,'');
+  const list=[...DB.payments].sort((a,b)=>b.date.localeCompare(a.date)).filter(p=>(p.no||'').includes(q));
+  $('paymentList').innerHTML=list.length?list.map(p=>{
+    const c=cust(p.customerId||book(p.bookingId).customerId);
+    const b=p.bookingId?book(p.bookingId):null;
+    const tag=b?`<span style="color:var(--teal);font-size:12px">বুকিং #${noBn(b.no||'')}</span>`:`<span class="badge adv" style="margin:0">নামে ক্রেডিট</span>`;
+    return `<div class="item"><div class="top">
+      <div><div class="nm">${c.name} <span style="color:var(--orange);font-size:12px">#${noBn(p.no||'')}</span></div>
+      <div class="meta">${dateBn(p.date)} · ${tag}</div>
+      <span class="badge pill-method">${p.method}</span></div>
+      <div class="acts"><div class="amt" style="color:var(--green);text-align:center">${fmt(p.amount)}</div>
+      <button class="act pr" onclick="printPayment('${p.id}')">বিস্তারিত</button>
+      <button class="act ed" onclick="editPayment('${p.id}')">এডিট</button>
+      <button class="act del" onclick="delPayment('${p.id}')">মুছুন</button></div>
+      </div></div>`;
+  }).join(''):`<div class="empty"><span class="ic">💵</span>কোনো পেমেন্ট নেই</div>`;
+}
+
+function renderExpenses(){
+  $('eCount').textContent=DB.expenses.length;
+  const q=toEn(($('eSearch').value||'')).replace(/[^0-9]/g,'');
+  const list=[...DB.expenses].sort((a,b)=>b.date.localeCompare(a.date)).filter(e=>(e.no||'').includes(q));
+  $('expenseList').innerHTML=list.length?list.map(e=>`
+    <div class="item"><div class="top">
+      <div><div class="nm">${e.category} <span style="color:var(--orange);font-size:12px">#${noBn(e.no||'')}</span></div>
+      <div class="meta">${dateBn(e.date)}${e.note?' · '+e.note:''}</div></div>
+      <div class="acts"><div class="amt" style="color:var(--red);text-align:center">${fmt(e.amount)}</div>
+      <button class="act ed" onclick="editExpense('${e.id}')">এডিট</button>
+      <button class="act del" onclick="delExpense('${e.id}')">মুছুন</button></div>
+      </div></div>`).join(''):`<div class="empty"><span class="ic">🧾</span>কোনো খরচ নেই</div>`;
+}
+
+function renderPackages(){
+  $('kCount').textContent=DB.packages.length;
+  $('packageList').innerHTML=DB.packages.length?DB.packages.map(k=>`
+    <div class="item"><div class="top">
+      <div><div class="nm">${k.name} <span class="badge umrah" style="margin:0">${k.cat}</span></div>
+      ${k.price?`<div class="meta">মূল্য ${fmt(k.price)}</div>`:''}
+      <div class="meta">${pkgLines(k).map(x=>x[0]+': '+x[1]).join(' · ')||'—'}</div>
+      ${k.terms?`<div class="meta">শর্ত: ${k.terms}</div>`:''}</div>
+      <div class="acts">
+      <button class="act ed" onclick="editPackage('${k.id}')">এডিট</button>
+      <button class="act del" onclick="delPackage('${k.id}')">মুছুন</button></div>
+      </div></div>`).join(''):`<div class="empty"><span class="ic">📦</span>কোনো প্যাকেজ নেই</div>`;
+}
+
+/* ---- searchable customer dropdowns ---- */
+function custOptions(q){
+  q=(q||'').toLowerCase();
+  return DB.customers.filter(c=>c.name.toLowerCase().includes(q)||(c.mobile||'').includes(q));
+}
+function filterBCust(){
+  const box=$('bCustList'),list=custOptions($('bCustSearch').value);
+  box.innerHTML=list.length?list.map(c=>`<div onclick="pickBCust('${c.id}')">${c.name} — ${c.mobile||''}</div>`).join(''):`<div class="none">পাওয়া যায়নি</div>`;
+  box.classList.add('show');
+}
+function pickBCust(id){const c=cust(id);$('bCustomer').value=id;$('bCustSearch').value=c.name;$('bCustList').classList.remove('show');}
+function filterPCust(){
+  const box=$('pCustList'),list=custOptions($('pCustSearch').value);
+  box.innerHTML=list.length?list.map(c=>{const du=custTotal(c.id)-custPaid(c.id);return `<div onclick="pickPCust('${c.id}')">${c.name} · বাকি ${fmt(du)}</div>`;}).join(''):`<div class="none">পাওয়া যায়নি</div>`;
+  box.classList.add('show');
+}
+function pickPCust(id){const c=cust(id);$('pCustomer').value=id;$('pCustSearch').value=c.name;$('pCustList').classList.remove('show');fillPayBookings();showBookingInfo();}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#bCustSearch')&&!e.target.closest('#bCustList'))$('bCustList')&&$('bCustList').classList.remove('show');
+  if(!e.target.closest('#pCustSearch')&&!e.target.closest('#pCustList'))$('pCustList')&&$('pCustList').classList.remove('show');
+});
+
+/* ---- booking conditional fields ---- */
+function toggleBookingFields(){
+  const t=$('bType').value;
+  $('bTypeOther').style.display=t==='অন্যান্য'?'block':'none';
+  const pkgs=DB.packages.filter(k=>k.cat===t);
+  if(pkgs.length){
+    $('bPkgWrap').style.display='block';
+    $('bPkg').innerHTML=`<option value="">— প্যাকেজ ছাড়া —</option>`+pkgs.map(k=>`<option value="${k.id}">${k.name}${k.price?' ('+fmt(k.price)+')':''}</option>`).join('');
+  }else $('bPkgWrap').style.display='none';
+  $('bFlightWrap').style.display=t==='টিকেট'?'block':'none';
+}
+
+function fillPayBookings(){
+  const cid=$('pCustomer').value;
+  const bks=[...DB.bookings].filter(b=>b.customerId===cid).sort((a,b)=>b.date.localeCompare(a.date));
+  let opts=`<option value="">— নির্দিষ্ট বুকিং নয় (নামে ক্রেডিট) —</option>`;
+  opts+=bks.map(b=>{const du=bnet(b)-paidFor(b.id);return `<option value="${b.id}">#${noBn(b.no)} · ${b.type} · ${dateBn(b.date)} · বাকি ${fmt(du)}</option>`;}).join('');
+  $('pBooking').innerHTML=opts;
+}
+function showBookingInfo(){
+  const el=$('pInfo'),cid=$('pCustomer').value;
+  if(!cid){el.style.display='none';return;}
+  const c=cust(cid),bid=$('pBooking').value;el.style.display='block';
+  if(bid){const b=book(bid),pd=paidFor(b.id),du=bnet(b)-pd;
+    el.innerHTML=`<b>#${noBn(b.no)} · ${c.name}</b><br>মোট মূল্য: <b>${fmt(bnet(b))}</b> · জমা: <b style="color:var(--green)">${fmt(pd)}</b> · বাকি: <b style="color:var(--orange)">${fmt(du)}</b>`;
+  }else{const tot=custTotal(cid),pd=custPaid(cid),du=tot-pd,n=DB.bookings.filter(b=>b.customerId===cid).length;
+    el.innerHTML=`<b>${c.name} — সব বুকিং (${n})</b><br>মোট মূল্য: <b>${fmt(tot)}</b> · জমা: <b style="color:var(--green)">${fmt(pd)}</b> · বাকি: <b style="color:var(--orange)">${fmt(du)}</b><br><span style="color:var(--muted)">নামে ক্রেডিট হবে।</span>`;}
+}
+
+function renderAll(){renderDashboard();renderCustomers();renderBookings();renderPayments();renderExpenses();renderPackages();
+  fillPayBookings();showBookingInfo();toggleBookingFields();}
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+let editCustomerId=null;
+function addCustomer(){
+  const name=$('cName').value.trim(),mobile=$('cMobile').value.trim(),address=$('cAddress').value.trim();
+  if(!name||!mobile||!address)return toast('নাম, মোবাইল ও ঠিকানা দিন');
+  const rec={name,mobile,address,passport:$('cPassport').value.trim(),issue:$('cIssue').value,expire:$('cExpire').value};
+  if(editCustomerId){Object.assign(cust(editCustomerId),rec);editCustomerId=null;
+    $('cEdbar').classList.remove('show');$('cSubmit').textContent='+ কাস্টমার যোগ করুন';toast('✅ কাস্টমার আপডেট হয়েছে');}
+  else{DB.customers.push(Object.assign({id:uid()},rec));toast('✅ কাস্টমার যোগ হয়েছে');}
+  ['cName','cMobile','cPassport','cAddress','cIssue','cExpire'].forEach(i=>$(i).value='');
+  renderAll();
+}
+function editCustomer(id){
+  const c=cust(id);editCustomerId=id;
+  $('cName').value=c.name;$('cMobile').value=c.mobile||'';$('cPassport').value=c.passport||'';
+  $('cAddress').value=c.address||'';$('cIssue').value=c.issue||'';$('cExpire').value=c.expire||'';
+  $('cEdbar').classList.add('show');$('cSubmit').textContent='✅ আপডেট করুন';switchTab('customer');window.scrollTo(0,0);
+}
+function cancelEditCustomer(){editCustomerId=null;$('cEdbar').classList.remove('show');$('cSubmit').textContent='+ কাস্টমার যোগ করুন';['cName','cMobile','cPassport','cAddress','cIssue','cExpire'].forEach(i=>$(i).value='');}
+function delCustomer(id){hardDelete(cust(id).name,()=>{DB.customers=DB.customers.filter(c=>c.id!==id);DB.bookings=DB.bookings.filter(b=>b.customerId!==id);DB.payments=DB.payments.filter(p=>p.customerId!==id);renderAll();});}
+
+function calcProfit(){/* প্রফিট বক্স সরানো হয়েছে */}
+
+let editBookingId=null;
+$('bPkg')&&($('bPkg').onchange=function(){const k=DB.packages.find(x=>x.id===this.value);if(k&&k.price){$('bTotal').value=k.price;calcProfit();}});
+
+function saveBooking(){
+  const customerId=$('bCustomer').value,total=$('bTotal').value,cost=$('bCost').value,date=$('bDate').value;
+  if(!customerId)return toast('কাস্টমার বাছুন');
+  if(!total||!cost||!date)return toast('মূল্য, কস্ট ও তারিখ দিন');
+  let type=$('bType').value;
+  if(type==='অন্যান্য'){type=$('bTypeOther').value.trim();if(!type)return toast('ধরন লিখুন');}
+  const pkgId=$('bPkg').value, pk=DB.packages.find(x=>x.id===pkgId);
+  const rec={customerId,type,
+    pkg:pk?pk.name:'',desc:pk?pkgText(pk):'',
+    airline:$('bType').value==='টিকেট'?$('bAirline').value.trim():'',
+    route:$('bType').value==='টিকেট'?$('bRoute').value.trim():'',
+    time:$('bType').value==='টিকেট'?$('bTime').value.trim():'',
+    total:+total,cost:+cost,discount:+$('bDiscount').value||0,date};
+  if(editBookingId){
+    const b=book(editBookingId);Object.assign(b,rec);editBookingId=null;
+    $('bEdbar').classList.remove('show');$('bSubmit').textContent='+ বুকিং যোগ করুন';toast('✅ বুকিং আপডেট হয়েছে');
+  }else{
+    DB.seq++;DB.bookings.push(Object.assign({id:uid(),no:'B-'+DB.seq},rec));toast('✅ বুকিং যোগ হয়েছে');
+  }
+  clearBookingForm();renderAll();
+}
+function clearBookingForm(){
+  ['bTotal','bCost','bDiscount','bTypeOther','bAirline','bRoute','bTime','bCustSearch'].forEach(i=>$(i).value='');
+  $('bCustomer').value='';$('bDate').value=today();$('bType').value='উমরাহ';toggleBookingFields();calcProfit();
+}
+function editBooking(id){
+  const b=book(id);editBookingId=id;
+  $('bCustomer').value=b.customerId;$('bCustSearch').value=cust(b.customerId).name;
+  const known=['উমরাহ','হজ্ব','টিকেট'].includes(b.type);
+  $('bType').value=known?b.type:'অন্যান্য';toggleBookingFields();
+  if(!known)$('bTypeOther').value=b.type;
+  $('bTotal').value=b.total;$('bCost').value=b.cost;$('bDiscount').value=b.discount||'';$('bDate').value=b.date;
+  if(b.airline)$('bAirline').value=b.airline;if(b.route)$('bRoute').value=b.route;if(b.time)$('bTime').value=b.time;
+  if(b.pkg){const k=DB.packages.find(x=>x.name===b.pkg&&x.cat===b.type);if(k)$('bPkg').value=k.id;}
+  calcProfit();
+  $('bEdtxt').textContent='#'+b.no+' এডিট করছেন';$('bEdbar').classList.add('show');$('bSubmit').textContent='✅ আপডেট করুন';
+  switchTab('booking');window.scrollTo(0,0);
+}
+function cancelEditBooking(){editBookingId=null;$('bEdbar').classList.remove('show');$('bSubmit').textContent='+ বুকিং যোগ করুন';clearBookingForm();}
+function delBooking(id){hardDelete('#'+book(id).no+' বুকিং',()=>{DB.bookings=DB.bookings.filter(b=>b.id!==id);DB.payments.forEach(p=>{if(p.bookingId===id)p.bookingId='';});renderAll();});}
+
+let editPaymentId=null;
+function savePayment(){
+  const customerId=$('pCustomer').value,bookingId=$('pBooking').value,amount=$('pAmount').value,date=$('pDate').value;
+  if(!customerId)return toast('কাস্টমার বাছুন');
+  if(!amount||!date)return toast('টাকা ও তারিখ দিন');
+  if(editPaymentId){
+    const p=DB.payments.find(x=>x.id===editPaymentId);
+    Object.assign(p,{customerId,bookingId:bookingId||'',amount:+amount,date,method:$('pMethod').value});
+    editPaymentId=null;$('pEdbar').classList.remove('show');$('pSubmit').textContent='+ পেমেন্ট যোগ করুন';
+    clearPaymentForm();renderAll();toast('✅ পেমেন্ট আপডেট হয়েছে');
+  }else{
+    const pid=uid();DB.pseq=(DB.pseq||100)+1;
+    DB.payments.push({id:pid,no:'P-'+DB.pseq,customerId,bookingId:bookingId||'',amount:+amount,date,method:$('pMethod').value});
+    clearPaymentForm();renderAll();toast(bookingId?'✅ বুকিংয়ে পেমেন্ট':'✅ নামে ক্রেডিট');printPayment(pid);
+  }
+}
+function clearPaymentForm(){$('pAmount').value='';$('pDate').value=today();$('pCustomer').value='';$('pCustSearch').value='';fillPayBookings();showBookingInfo();}
+function editPayment(id){
+  const p=DB.payments.find(x=>x.id===id);editPaymentId=id;
+  $('pCustomer').value=p.customerId;$('pCustSearch').value=cust(p.customerId).name;
+  fillPayBookings();$('pBooking').value=p.bookingId||'';
+  $('pAmount').value=p.amount;$('pDate').value=p.date;$('pMethod').value=p.method;showBookingInfo();
+  $('pEdbar').classList.add('show');$('pSubmit').textContent='✅ আপডেট করুন';switchTab('payment');window.scrollTo(0,0);
+}
+function cancelEditPayment(){editPaymentId=null;$('pEdbar').classList.remove('show');$('pSubmit').textContent='+ পেমেন্ট যোগ করুন';clearPaymentForm();}
+function delPayment(id){hardDelete('পেমেন্ট',()=>{DB.payments=DB.payments.filter(p=>p.id!==id);renderAll();});}
+
+let editExpenseId=null;
+function addExpense(){
+  const amount=$('eAmount').value,date=$('eDate').value;
+  if(!amount||!date)return toast('পরিমাণ ও তারিখ দিন');
+  const rec={category:$('eCat').value,amount:+amount,date,note:$('eNote').value.trim()};
+  if(editExpenseId){Object.assign(DB.expenses.find(x=>x.id===editExpenseId),rec);editExpenseId=null;
+    $('eEdbar').classList.remove('show');$('eSubmit').textContent='+ খরচ যোগ করুন';toast('✅ খরচ আপডেট হয়েছে');}
+  else{DB.eseq=(DB.eseq||100)+1;DB.expenses.push(Object.assign({id:uid(),no:'E-'+DB.eseq},rec));toast('✅ খরচ যোগ হয়েছে');}
+  $('eAmount').value='';$('eNote').value='';$('eDate').value=today();renderAll();
+}
+function editExpense(id){
+  const e=DB.expenses.find(x=>x.id===id);editExpenseId=id;
+  $('eCat').value=e.category;$('eAmount').value=e.amount;$('eDate').value=e.date;$('eNote').value=e.note||'';
+  $('eEdbar').classList.add('show');$('eSubmit').textContent='✅ আপডেট করুন';switchTab('expense');window.scrollTo(0,0);
+}
+function cancelEditExpense(){editExpenseId=null;$('eEdbar').classList.remove('show');$('eSubmit').textContent='+ খরচ যোগ করুন';$('eAmount').value='';$('eNote').value='';}
+function delExpense(id){const e=DB.expenses.find(x=>x.id===id);hardDelete(e.category,()=>{DB.expenses=DB.expenses.filter(x=>x.id!==id);renderAll();});}
+
+let editPackageId=null;
+// ভরা ফিল্ডগুলো থেকে বিবরণ লাইন
+function pkgLines(k){
+  return [['বিমান',k.airline],['তারিখ',k.date],['মক্কা হোটেল',k.makkah],['মদিনা হোটেল',k.madinah],['প্রতি রুমে',k.room],['খাবার',k.food]].filter(x=>x[1]);
+}
+function pkgText(k){
+  let t=pkgLines(k).map(x=>x[0]+': '+x[1]).join('\n');
+  if(k.terms)t+=(t?'\n':'')+'শর্তাবলী: '+k.terms;
+  return t;
+}
+function readPkgForm(){
+  return {cat:$('kCat').value,name:$('kName').value.trim(),airline:$('kAirline').value.trim(),
+    date:$('kDate').value.trim(),makkah:$('kMakkah').value.trim(),madinah:$('kMadinah').value.trim(),
+    room:$('kRoom').value.trim(),food:$('kFood').value.trim(),terms:$('kTerms').value.trim(),price:+$('kPrice').value||0};
+}
+function clearPkgForm(){['kName','kAirline','kDate','kMakkah','kMadinah','kRoom','kFood','kTerms','kPrice'].forEach(i=>$(i).value='');}
+function addPackage(){
+  if(!$('kName').value.trim())return toast('প্যাকেজের নাম দিন');
+  const rec=readPkgForm();
+  if(editPackageId){Object.assign(DB.packages.find(x=>x.id===editPackageId),rec);editPackageId=null;
+    $('kEdbar').classList.remove('show');$('kSubmit').textContent='+ প্যাকেজ যোগ করুন';toast('✅ প্যাকেজ আপডেট হয়েছে');}
+  else{DB.packages.push(Object.assign({id:uid()},rec));toast('✅ প্যাকেজ যোগ হয়েছে');}
+  clearPkgForm();renderAll();
+}
+function editPackage(id){
+  const k=DB.packages.find(x=>x.id===id);editPackageId=id;
+  $('kCat').value=k.cat;$('kName').value=k.name;$('kAirline').value=k.airline||'';$('kDate').value=k.date||'';
+  $('kMakkah').value=k.makkah||'';$('kMadinah').value=k.madinah||'';$('kRoom').value=k.room||'';
+  $('kFood').value=k.food||'';$('kTerms').value=k.terms||'';$('kPrice').value=k.price||'';
+  $('kEdbar').classList.add('show');$('kSubmit').textContent='✅ আপডেট করুন';switchTab('packages');window.scrollTo(0,0);
+}
+function cancelEditPackage(){editPackageId=null;$('kEdbar').classList.remove('show');$('kSubmit').textContent='+ প্যাকেজ যোগ করুন';clearPkgForm();}
+function delPackage(id){const k=DB.packages.find(x=>x.id===id);hardDelete(k.name,()=>{DB.packages=DB.packages.filter(x=>x.id!==id);renderAll();});}
+
+/* =========================================================
+   PRINT (একই পেজে #printArea)
+   ========================================================= */
+const periodLabel=()=>period==='month'?'এই মাসের':period==='year'?'এই বছরের':'সর্বমোট';
+function bizHeader(){
+  const info=[BIZ.address, BIZ.mobile, BIZ.email, BIZ.web].filter(Boolean).join(' · ');
+  return `<div class="rc-head"><img src="${BIZ.logo}" alt="">
+    <div class="biz"><h1>${BIZ.name}</h1><div class="tag">হজ্ব উমরাহ ও হোটেল বুকিং স্পেশালিষ্ট</div>
+    <div class="info">${info}</div></div></div>`;
+}
+function printShell(title,inner,size){
+  $('printArea').innerHTML=`<div class="po-bar">
+      <button class="pr" onclick="window.print()">🖨️ প্রিন্ট / PDF সেভ</button>
+      <button class="cl" onclick="closePrint()">✕ বন্ধ</button></div>
+    <div class="po-page ${size==='half'?'half':''}">${bizHeader()}
+      <div class="rc-title">${title}</div>${inner}
+      <div class="rc-foot"><span>ধন্যবাদ — ${BIZ.name}</span><span>তারিখ: ${dateBn(today())}</span></div>
+    </div>`;
+  $('printArea').classList.add('show');$('printArea').scrollTop=0;
+}
+function closePrint(){$('printArea').classList.remove('show');$('printArea').innerHTML='';}
+const signBlock=`<div class="rc-foot" style="border:0;margin-top:18px"><div class="rc-sign"><div class="ln"></div>গ্রাহক স্বাক্ষর</div><div class="rc-sign"><div class="ln"></div>কর্তৃপক্ষ</div></div>`;
+
+function printPayment(pid){
+  const p=DB.payments.find(x=>x.id===pid);if(!p)return;
+  const c=cust(p.customerId),b=p.bookingId?book(p.bookingId):null;
+  const tot=custTotal(p.customerId),paid=custPaid(p.customerId),due=tot-paid;
+  printShell('পেমেন্ট রসিদ (মানি রিসিট)',`
+    <div class="rc-meta"><span>রসিদ নং: #${noBn(p.no||('P-'+p.id.slice(-4)))}</span><span>তারিখ: ${dateBn(p.date)}</span></div>
+    <div class="rc-row"><span class="k">কাস্টমার</span><span class="v">${c.name}</span></div>
+    <div class="rc-row"><span class="k">মোবাইল</span><span class="v">${c.mobile||'—'}</span></div>
+    <div class="rc-row"><span class="k">খাত</span><span class="v">${b?('#'+b.no+' · '+b.type):'নামে ক্রেডিট'}</span></div>
+    <div class="rc-row"><span class="k">পেমেন্ট মেথড</span><span class="v">${p.method}</span></div>
+    <div class="rc-amount"><div class="l">জমা টাকা</div><div class="n">${fmt(p.amount)}</div></div>
+    <div class="rc-row"><span class="k">মোট মূল্য</span><span class="v">${fmt(tot)}</span></div>
+    <div class="rc-row"><span class="k">মোট জমা</span><span class="v green">${fmt(paid)}</span></div>
+    <div class="rc-row"><span class="k">${due<0?'অগ্রিম জমা':'বর্তমান বাকি'}</span><span class="v ${due<0?'green':'orange'}">${fmt(Math.abs(due))}</span></div>
+    ${signBlock}`,'half');
+}
+
+function printBooking(id){
+  const b=book(id);if(!b.id)return;
+  const c=cust(b.customerId),pd=paidFor(b.id),du=bnet(b)-pd;
+  const pays=DB.payments.filter(p=>p.bookingId===b.id);
+  const payRows=pays.length?pays.map(p=>`<tr><td>${dateBn(p.date)}</td><td>${p.method}</td><td class="r green">${fmt(p.amount)}</td></tr>`).join(''):'<tr><td colspan="3">কোনো পেমেন্ট নেই</td></tr>';
+  let detail='';
+  if(b.pkg)detail=`<div class="rc-row"><span class="k">প্যাকেজ</span><span class="v">${b.pkg}</span></div>`+(b.desc?`<div class="rc-desc">${b.desc}</div>`:'');
+  if(b.type==='টিকেট')detail=`<div class="rc-row"><span class="k">বিমান</span><span class="v">${b.airline||'—'}</span></div>
+    <div class="rc-row"><span class="k">রুট</span><span class="v">${b.route||'—'}</span></div>
+    <div class="rc-row"><span class="k">সময়</span><span class="v">${b.time||'—'}</span></div>`;
+  const discRow=b.discount?`<div class="rc-row"><span class="k">ছাড়</span><span class="v red">− ${fmt(b.discount)}</span></div>`:'';
+  printShell('বুকিং রসিদ',`
+    <div class="rc-meta"><span>বুকিং নং: #${noBn(b.no)}</span><span>তারিখ: ${dateBn(b.date)}</span></div>
+    <h3>কাস্টমার</h3>
+    <div class="rc-row"><span class="k">নাম</span><span class="v">${c.name}</span></div>
+    <div class="rc-row"><span class="k">মোবাইল</span><span class="v">${c.mobile||'—'}</span></div>
+    <div class="rc-row"><span class="k">পাসপোর্ট</span><span class="v">${c.passport||'—'}</span></div>
+    <div class="rc-row"><span class="k">ঠিকানা</span><span class="v">${c.address||'—'}</span></div>
+    <h3>বুকিং বিবরণ</h3>
+    <div class="rc-row"><span class="k">ধরন</span><span class="v">${b.type}</span></div>
+    ${detail}
+    <div class="rc-row"><span class="k">বিক্রয় মূল্য</span><span class="v">${fmt(b.total)}</span></div>
+    ${discRow}
+    <div class="rc-row"><span class="k">মোট মূল্য</span><span class="v">${fmt(bnet(b))}</span></div>
+    <div class="rc-row"><span class="k">মোট জমা</span><span class="v green">${fmt(pd)}</span></div>
+    <div class="rc-row"><span class="k">${du<0?'অগ্রিম':'বাকি'}</span><span class="v ${du<0?'green':'orange'}">${fmt(Math.abs(du))}</span></div>
+    <h3>পেমেন্ট হিস্ট্রি</h3>
+    <table><tr><th>তারিখ</th><th>মেথড</th><th class="r">টাকা</th></tr>${payRows}</table>
+    ${signBlock}`,'a4');
+}
+
+function printReport(){
+  const bks=DB.bookings.filter(b=>inPeriod(b.date));
+  const pays=DB.payments.filter(p=>inPeriod(p.date));
+  const exps=DB.expenses.filter(e=>inPeriod(e.date));
+  const sales=bks.reduce((s,b)=>s+bnet(b),0),collect=pays.reduce((s,p)=>s+ +p.amount,0);
+  const expense=exps.reduce((s,e)=>s+ +e.amount,0),cost=bks.reduce((s,b)=>s+(+b.cost||0),0);
+  const profit=bks.reduce((s,b)=>s+(bnet(b)-(+b.cost||0)),0);
+  const dueCusts=[...new Set(bks.map(b=>b.customerId))],due=dueCusts.reduce((s,cid)=>s+(custTotal(cid)-custPaid(cid)),0);
+  printShell(periodLabel()+' রিপোর্ট',`
+    <div class="po-sum">
+      <div><div class="l">মোট বিক্রয়</div><div class="v">${fmt(sales)}</div></div>
+      <div><div class="l">মোট আদায়</div><div class="v">${fmt(collect)}</div></div>
+      <div><div class="l">মোট বাকি</div><div class="v orange">${fmt(due)}</div></div>
+      <div><div class="l">মোট ক্রয়</div><div class="v">${fmt(cost)}</div></div>
+      <div><div class="l">অফিস খরচ</div><div class="v red">${fmt(expense)}</div></div>
+      <div><div class="l">মোট প্রফিট</div><div class="v green">${fmt(profit)}</div></div>
+      <div><div class="l">নিট প্রফিট</div><div class="v green">${fmt(profit-expense)}</div></div>
+    </div>
+    <h3>বুকিং সমূহ (${bks.length})</h3>
+    <table><tr><th>কাস্টমার</th><th>ধরন</th><th class="r">বিক্রয়</th><th class="r">আদায়</th><th class="r">বাকি</th></tr>
+    ${bks.map(b=>{const c=cust(b.customerId),pd=paidFor(b.id);return `<tr><td>${c.name}</td><td>${b.type}</td><td class="r">${fmt(bnet(b))}</td><td class="r">${fmt(pd)}</td><td class="r">${fmt(bnet(b)-pd)}</td></tr>`;}).join('')}
+    </table>`,'a4');
+}
+function printBookings(){
+  const list=[...DB.bookings].sort((a,b)=>b.date.localeCompare(a.date));
+  const sales=list.reduce((s,b)=>s+bnet(b),0),profit=list.reduce((s,b)=>s+(bnet(b)-(+b.cost||0)),0);
+  const cost=list.reduce((s,b)=>s+(+b.cost||0),0),tdue=list.reduce((s,b)=>s+(bnet(b)-paidFor(b.id)),0);
+  printShell('সব বুকিং লিস্ট',`
+    <h3>সব বুকিং (${toBn(list.length)})</h3>
+    <div style="overflow-x:auto"><table class="wt"><tr><th>নং</th><th>কাস্টমার</th><th>ধরন</th><th class="r">বিক্রয়</th><th class="r">কস্ট</th><th class="r">প্রফিট</th><th class="r">বাকি</th></tr>
+    ${list.map(b=>{const c=cust(b.customerId),pd=paidFor(b.id);return `<tr><td>${noBn(b.no)}</td><td>${c.name}</td><td>${b.type}</td><td class="r">${fmt(bnet(b))}</td><td class="r">${fmt(b.cost||0)}</td><td class="r green">${fmt(bnet(b)-(+b.cost||0))}</td><td class="r orange">${fmt(bnet(b)-pd)}</td></tr>`;}).join('')}
+    <tr><th colspan="3">মোট</th><th class="r">${fmt(sales)}</th><th class="r">${fmt(cost)}</th><th class="r green">${fmt(profit)}</th><th class="r orange">${fmt(tdue)}</th></tr></table></div>`,'a4');
+}
+function printExpenses(){
+  const list=[...DB.expenses].sort((a,b)=>b.date.localeCompare(a.date)),total=list.reduce((s,e)=>s+ +e.amount,0);
+  printShell('খরচ হিসাব',`
+    <h3>অফিস খরচ (${list.length})</h3>
+    <table><tr><th>তারিখ</th><th>ধরন</th><th>নোট</th><th class="r">পরিমাণ</th></tr>
+    ${list.map(e=>`<tr><td>${dateBn(e.date)}</td><td>${e.category}</td><td>${e.note||'—'}</td><td class="r red">${fmt(e.amount)}</td></tr>`).join('')}
+    <tr><th colspan="3">মোট খরচ</th><th class="r red">${fmt(total)}</th></tr></table>`,'a4');
+}
+function printCustomer(id){
+  const c=cust(id),bks=DB.bookings.filter(b=>b.customerId===id),totSale=custTotal(id),totPaid=custPaid(id);
+  const rows=bks.map(b=>{const pd=paidFor(b.id);
+    const pays=DB.payments.filter(p=>p.bookingId===b.id).map(p=>`${dateBn(p.date)} ${p.method} ${fmt(p.amount)}`).join('<br>')||'—';
+    return `<tr><td>#${noBn(b.no)}<br>${dateBn(b.date)}</td><td>${b.type}</td><td class="r">${fmt(bnet(b))}</td><td>${pays}</td><td class="r">${fmt(bnet(b)-pd)}</td></tr>`;}).join('');
+  const credits=DB.payments.filter(p=>p.customerId===id&&!p.bookingId);
+  const creditRows=credits.length?`<h3>নামে ক্রেডিট</h3><table><tr><th>তারিখ</th><th>মেথড</th><th class="r">টাকা</th></tr>${credits.map(p=>`<tr><td>${dateBn(p.date)}</td><td>${p.method}</td><td class="r green">${fmt(p.amount)}</td></tr>`).join('')}</table>`:'';
+  const du=totSale-totPaid;
+  printShell(c.name,`
+    <div class="rc-row"><span class="k">মোবাইল</span><span class="v">${c.mobile||'—'}</span></div>
+    <div class="rc-row"><span class="k">ঠিকানা</span><span class="v">${c.address||'—'}</span></div>
+    <div class="rc-row"><span class="k">পাসপোর্ট নম্বর</span><span class="v">${c.passport||'—'}</span></div>
+    <div class="rc-row"><span class="k">পাসপোর্ট ইস্যু</span><span class="v">${c.issue?dateBn(c.issue):'—'}</span></div>
+    <div class="rc-row"><span class="k">পাসপোর্ট এক্সপায়ার</span><span class="v">${c.expire?dateBn(c.expire):'—'}</span></div>
+    <h3>বুকিং ও পেমেন্ট</h3>
+    <table><tr><th>বুকিং / তারিখ</th><th>ধরন</th><th class="r">মূল্য</th><th>পেমেন্ট</th><th class="r">বাকি</th></tr>
+    ${rows||'<tr><td colspan="5">কোনো বুকিং নেই</td></tr>'}</table>${creditRows}
+    <div class="po-sum">
+      <div><div class="l">মোট মূল্য</div><div class="v">${fmt(totSale)}</div></div>
+      <div><div class="l">মোট জমা</div><div class="v green">${fmt(totPaid)}</div></div>
+      <div><div class="l">${du<0?'অগ্রিম':'মোট বাকি'}</div><div class="v ${du<0?'green':'orange'}">${fmt(Math.abs(du))}</div></div>
+    </div>`,'a4');
+}
+
+function exportData(){
+  const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='insaf_backup_'+today()+'.json';a.click();
+  toast('📥 ব্যাকআপ ডাউনলোড');
+}
+function resetDemo(){const a=prompt('রিসেট করতে RESET লিখুন:');if(a&&a.trim().toUpperCase()==='RESET'){seedDemo();renderAll();toast('🔄 রিসেট হয়েছে');}}
+
+/* =========================================================
+   NAV + DRAWER + INIT
+   ========================================================= */
+const TABS=[
+  {id:'dashboard',ic:'📊',t:'ড্যাশবোর্ড'},{id:'customer',ic:'👤',t:'কাস্টমার'},
+  {id:'booking',ic:'📋',t:'বুকিং'},{id:'payment',ic:'💵',t:'পেমেন্ট'},
+  {id:'expense',ic:'🧾',t:'খরচ'},{id:'packages',ic:'📦',t:'প্যাকেজ তৈরি'}
+];
+function switchTab(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $(id).classList.add('active');
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+  document.querySelectorAll('#drList button[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+  window.scrollTo(0,0);
+}
+function openDrawer(){$('drawerBg').classList.add('show');$('drawer').classList.add('show');}
+function closeDrawer(){$('drawerBg').classList.remove('show');$('drawer').classList.remove('show');}
+function buildDrawer(){
+  let h=TABS.map(t=>`<button data-tab="${t.id}" onclick="switchTab('${t.id}');closeDrawer()"><span class="ic">${t.ic}</span>${t.t}</button>`).join('');
+  h+=`<div class="dr-sep"></div>
+    <button onclick="exportData();closeDrawer()"><span class="ic">📥</span>ব্যাকআপ ডাউনলোড</button>
+    <button onclick="resetDemo();closeDrawer()"><span class="ic">🔄</span>ডেমো ডেটা রিসেট</button>
+    <button class="logout" onclick="logout()"><span class="ic">🚪</span>লগ আউট</button>`;
+  $('drList').innerHTML=h;
+}
+function logout(){closeDrawer();toast('🚪 লগ আউট (ডেমো) — Firebase ধাপে আসল লগইন হবে');}
+
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+document.querySelectorAll('#periodPills .pill').forEach(p=>p.onclick=()=>{
+  document.querySelectorAll('#periodPills .pill').forEach(x=>x.classList.remove('active'));
+  p.classList.add('active');period=p.dataset.period;renderDashboard();
+});
+
+// init
+$('hdrLogo').src=BIZ.logo;$('drLogo').src=BIZ.logo;$('drName').textContent=BIZ.name;$('drAd').textContent=BIZ.address;
+buildDrawer();seedDemo();
+$('bDate').value=today();$('pDate').value=today();$('eDate').value=today();
+renderAll();
+</script>
+</body>
+</html>
