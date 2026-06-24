@@ -1,0 +1,27 @@
+{
+  "name": "ইনসাফ ট্রাভেলস — ম্যানেজমেন্ট",
+  "short_name": "ইনসাফ ম্যানেজমেন্ট",
+  "description": "ইনসাফ ট্রাভেলস ব্রাঞ্চ ম্যানেজমেন্ট — কাস্টমার, বুকিং, পেমেন্ট, খরচ ও প্যাকেজ।",
+  "lang": "bn",
+  "dir": "ltr",
+  "start_url": "/insafmanagement/",
+  "scope": "/insafmanagement/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f6fa",
+  "theme_color": "#1a3a6b",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
