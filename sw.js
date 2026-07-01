@@ -1,6 +1,6 @@
 /* ইনসাফ ম্যানেজমেন্ট — Service Worker
    প্রতিবার ডিপ্লয়ের সময় নিচের CACHE_NAME ভার্সন বাড়াবেন (v1 -> v2 ...)। */
-const CACHE_NAME = 'insafmgmt-v14';
+const CACHE_NAME = 'insafmgmt-v15';
 
 const ASSETS = [
   '/insafmanagement/',
